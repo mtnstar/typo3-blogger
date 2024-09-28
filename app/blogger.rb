@@ -1,3 +1,5 @@
+require_relative "photos/processor"
+
 class Blogger
 
   LOCAL_BLOG_ENTRIES_DIR = File.expand_path("../blog-entries", File.dirname(__FILE__)) 
@@ -9,6 +11,9 @@ class Blogger
   end
 
   def process_photos
+    @new_local_blog_entries.each do |entry|
+      photos_processor.process(entry)
+    end
   end
 
   def upload_photos
@@ -26,6 +31,12 @@ class Blogger
   end
 
   private
+
+  def photos_processor
+    @photos_processor ||=
+      Photos::Processor.new(output: @output,
+                            blog_entries_dir: @blog_entries_dir)
+  end
 
   def fetch_new_local_blog_entries
     fetch_new_local_blog_directories.map do |entry|

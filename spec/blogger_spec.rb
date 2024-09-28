@@ -31,8 +31,22 @@ describe Blogger do
     end
   end
 
-  context "photo processing" do
+  context "#proccess_photos" do
+    let(:proccessed_photos_dir) { File.join(test_blog_entries_dir, "processed") }
+
     it "renames and organises photos in daily folders" do
+      expected_output = ["2024-08 Piz Bernina: Photo 2024-08-07-09-04-04-000.jpg has no date time"]
+      #expected_output << "2024-08 Piz Bernina\n"
+
+      expected_output.each do |output_line|
+        expect(output).to receive(:print).with(output_line)
+      end
+
+      blogger.process_photos
+
+      ["2024-08-06", "2024-08-07", "2024-08-08"].each do |day|
+        expect(Dir.exist?(File.join(proccessed_photos_dir, "2024-08 Piz Bernina", day))).to be true
+      end
     end
   end
 end
