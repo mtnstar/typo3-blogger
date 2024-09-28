@@ -18,15 +18,18 @@ module Photos
         if date_time.nil?
           output(entry, "Photo #{File.basename(photo)} has no date time")
         else
-          date_times << image.date_time_original
+          move_proccessed(photo, date_time, entry)
         end
       end
-
-      date_times.map! { |date_time| date_time.to_date.strftime("%Y-%m-%d") }.uniq!
-      create_day_dirs(entry, date_times)
     end
 
     private
+
+    def move_proccessed(photo, date_time, entry)
+      target_dir = create_day_dir(entry, date_time.to_date.strftime("%Y-%m-%d"))
+      target_file_name = "#{date_time.strftime("%Y%m%d_%H%M%S")}.jpg"
+      FileUtils.mv(photo, File.join(target_dir, target_file_name))
+    end
 
     def output(entry, message)
       @output.print("#{entry[:year_month]} #{entry[:name]}: #{message}")
@@ -36,11 +39,10 @@ module Photos
       "#{entry[:year_month]} #{entry[:name]}"
     end
 
-    def create_day_dirs(entry, days)
-      days.each do |day|
-        dir_path = File.join(@processed_photos_dir, dir_name(entry), day)
-        FileUtils.mkdir_p(dir_path) unless Dir.exist?(dir_path)
-      end
+    def create_day_dir(entry, day)
+      dir_path = File.join(@processed_photos_dir, dir_name(entry), day)
+      FileUtils.mkdir_p(dir_path) unless Dir.exist?(dir_path)
+      dir_path
     end
 
     def proccessed_photos_dir(blog_entries_dir)

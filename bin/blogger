@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require_relative '../app/blogger'
+
+# Instantiate the Blogger class
+blogger = Blogger.new
+
+# Command-line interface
+command = ARGV[0]
+
+case command
+when 'status'
+  blogger.status
+when 'process_photos'
+  blogger.process_photos
+else
+  puts "Unknown command. Available commands are: status, process_photos"
+end
