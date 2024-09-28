@@ -33,10 +33,38 @@ describe Blogger do
 
   context "#proccess_photos" do
     let(:proccessed_photos_dir) { File.join(test_blog_entries_dir, "processed") }
+    let(:target_day_file_names) do
+      {
+        "2024-08-06" => [
+          "20240806_101105.jpg", "20240806_115847.jpg", "20240806_135242.jpg", "20240806_151318.jpg"
+        ],
+        "2024-08-07" => [
+          "20240807_071732.jpg", "20240807_083524.jpg", "20240807_055134.jpg", "20240807_060047.jpg",
+          "20240807_062005.jpg", "20240807_072555.jpg", "20240807_074153.jpg", "20240807_074435.jpg",
+          "20240807_075944.jpg", "20240807_081218.jpg", "20240807_081219.jpg", "20240807_092756.jpg",
+          "20240807_092806.jpg", "20240807_094927.jpg", "20240807_061338.jpg"
+        ],
+        "2024-08-08" => [
+          "20240808_061917.jpg", "20240808_061921.jpg", "20240808_072551.jpg", "20240808_071754.jpg",
+          "20240808_073355.jpg", "20240808_074606.jpg", "20240808_075409.jpg", "20240808_082357.jpg",
+          "20240808_082401.jpg", "20240808_083316.jpg", "20240808_091159.jpg", "20240808_061308.jpg"
+        ]
+      }
+    end
 
     it "renames and organises photos in daily folders" do
-      expected_output = ["2024-08 Piz Bernina: Photo 2024-08-07-09-04-04-000.jpg has no date time"]
-      #expected_output << "2024-08 Piz Bernina\n"
+      target_file_names = target_day_file_names.values.flatten
+
+      failed_output_messages = [
+        "2024-08 Piz Bernina: Photo 2024-08-07-09-04-04-000.jpg has no date time\n"
+      ]
+
+      expected_output = []
+      expected_output.concat(failed_output_messages)
+
+      target_file_names.each do |file_name|
+        expected_output << "2024-08 Piz Bernina: moved #{file_name} to processed\n"
+      end
 
       expected_output.each do |output_line|
         expect(output).to receive(:print).with(output_line)
@@ -45,7 +73,16 @@ describe Blogger do
       blogger.process_photos
 
       ["2024-08-06", "2024-08-07", "2024-08-08"].each do |day|
-        expect(Dir.exist?(File.join(proccessed_photos_dir, "2024-08 Piz Bernina", day))).to be true
+        day_folder = File.join(proccessed_photos_dir, "2024-08 Piz Bernina", day)
+        expect(Dir.exist?(day_folder)).to be true
+
+        file_names = Dir.entries(day_folder).select { |f| !File.directory?(f) }
+        expected_file_names = target_day_file_names[day]
+        expect(file_names.size).to eq(expected_file_names.size)
+
+        file_names.each do |file_name|
+          expect(expected_file_names).to include(file_name)
+        end
       end
     end
   end

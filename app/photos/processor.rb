@@ -16,7 +16,7 @@ module Photos
         image = MiniExiftool.new(photo)
         date_time = image.date_time_original
         if date_time.nil?
-          output(entry, "Photo #{File.basename(photo)} has no date time")
+          output(entry, "Photo #{File.basename(photo)} has no date time\n")
         else
           move_proccessed(photo, date_time, entry)
         end
@@ -29,6 +29,7 @@ module Photos
       target_dir = create_day_dir(entry, date_time.to_date.strftime("%Y-%m-%d"))
       target_file_name = "#{date_time.strftime("%Y%m%d_%H%M%S")}.jpg"
       FileUtils.mv(photo, File.join(target_dir, target_file_name))
+      output(entry, "moved #{target_file_name} to processed\n")
     end
 
     def output(entry, message)
