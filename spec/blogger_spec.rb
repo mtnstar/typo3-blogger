@@ -21,6 +21,7 @@ describe Blogger do
     it "lists all new and processed blog entries" do
       expected_output = ["Blog entries to be proccessed: \n"]
       expected_output << "2024-08 Piz Bernina\n"
+      expected_output << "2022-11 Queen Charlotte Track\n"
       # TODO list also processed entries
 
       expected_output.each do |output_line|
@@ -31,9 +32,9 @@ describe Blogger do
     end
   end
 
-  context "#proccess_photos" do
-    let(:proccessed_photos_dir) { File.join(test_blog_entries_dir, "processed") }
-    let(:target_day_file_names) do
+  context "#process" do
+    let(:processed_photos_dir) { File.join(test_blog_entries_dir, "processed") }
+    let(:bernina_target_day_file_names) do
       {
         "2024-08-06" => [
           "20240806_101105.jpg", "20240806_115847.jpg", "20240806_135242.jpg", "20240806_151318.jpg"
@@ -53,9 +54,10 @@ describe Blogger do
     end
 
     it "renames and organises photos in daily folders" do
-      target_file_names = target_day_file_names.values.flatten
+      target_file_names = bernina_target_day_file_names.values.flatten
 
       failed_output_messages = [
+        "2022-11 Queen Charlotte Track: Photo boat1.jpg has no date time\n",
         "2024-08 Piz Bernina: Photo 2024-08-07-09-04-04-000.jpg has no date time\n"
       ]
 
@@ -70,14 +72,14 @@ describe Blogger do
         expect(output).to receive(:print).with(output_line)
       end
 
-      blogger.process_photos
+      blogger.process
 
       ["2024-08-06", "2024-08-07", "2024-08-08"].each do |day|
-        day_folder = File.join(proccessed_photos_dir, "2024-08 Piz Bernina", day)
+        day_folder = File.join(processed_photos_dir, "2024-08 Piz Bernina", day)
         expect(Dir.exist?(day_folder)).to be true
 
         file_names = Dir.entries(day_folder).select { |f| !File.directory?(f) }
-        expected_file_names = target_day_file_names[day]
+        expected_file_names = bernina_target_day_file_names[day]
         expect(file_names.size).to eq(expected_file_names.size)
 
         file_names.each do |file_name|

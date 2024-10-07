@@ -10,7 +10,7 @@ class Blogger
     @new_local_blog_entries = fetch_new_local_blog_entries
   end
 
-  def process_photos
+  def process
     @new_local_blog_entries.each do |entry|
       photos_processor.process(entry)
     end

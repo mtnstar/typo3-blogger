@@ -12,7 +12,7 @@ module Photos
 
     def process(entry)
       date_times = []
-      Dir.glob(File.join(@new_photos_dir, "*", "*.{jpg,jpeg}")).each do |photo|
+      Dir.glob(File.join(@new_photos_dir, dir_name(entry), "*.{jpg,jpeg,JPG,JPEG}")).each do |photo|
         image = MiniExiftool.new(photo)
         date_time = image.date_time_original
         if date_time.nil?

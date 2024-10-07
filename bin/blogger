@@ -11,8 +11,8 @@ command = ARGV[0]
 case command
 when 'status'
   blogger.status
-when 'process_photos'
-  blogger.process_photos
+when 'process'
+  blogger.process
 else
   puts "Unknown command. Available commands are: status, process_photos"
 end
