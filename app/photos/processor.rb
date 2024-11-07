@@ -14,7 +14,7 @@ module Photos
       date_times = []
       Dir.glob(File.join(@new_photos_dir, dir_name(entry), "*.{jpg,jpeg,JPG,JPEG}")).each do |photo|
         image = MiniExiftool.new(photo)
-        date_time = image.date_time_original
+        date_time = image.date_time_original || fetch_date_from_file_name(photo)
         if date_time.nil?
           output(entry, "Photo #{File.basename(photo)} has no date time\n")
         else
@@ -30,6 +30,15 @@ module Photos
       target_file_name = "#{date_time.strftime("%Y%m%d_%H%M%S")}.jpg"
       FileUtils.mv(photo, File.join(target_dir, target_file_name))
       output(entry, "moved #{target_file_name} to processed\n")
+    end
+
+    def fetch_date_from_file_name(photo)
+      file_name = File.basename(photo)
+      if file_name =~ /^(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-\d+\.jpg$/
+        DateTime.strptime(file_name, '%Y-%m-%d-%H-%M-%S')
+      else
+        nil
+      end
     end
 
     def output(entry, message)
