@@ -85,6 +85,14 @@ describe Blogger do
           expect(expected_file_names).to include(file_name)
         end
       end
+
+    end
+
+    it "removes new folder if all photos are processed or keeps them if not" do
+      blogger.process
+
+      expect(Dir.exist?(File.join(test_blog_entries_dir, "new", "2024-08 Piz Bernina"))).to be false
+      expect(Dir.exist?(File.join(test_blog_entries_dir, "new", "2022-11 Queen Charlotte Track"))).to be true
     end
   end
 end

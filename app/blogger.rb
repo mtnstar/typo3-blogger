@@ -14,6 +14,7 @@ class Blogger
     @new_local_blog_entries.each do |entry|
       photos_processor.process(entry)
     end
+    remove_empty_new_folders
   end
 
   def upload_photos
@@ -32,6 +33,15 @@ class Blogger
 
   private
 
+  def remove_empty_new_folders
+    Dir.entries(new_blog_entries_dir).each do |dir|
+      full_path = File.join(new_blog_entries_dir, dir)
+      if Dir.empty?(full_path)
+        FileUtils.rmdir(full_path)
+      end
+    end
+  end
+
   def photos_processor
     @photos_processor ||=
       Photos::Processor.new(output: @output,
@@ -46,8 +56,11 @@ class Blogger
     end.compact
   end
 
+  def new_blog_entries_dir
+    File.join(@blog_entries_dir, "new")
+  end
+
   def fetch_new_local_blog_directories
-    new_blog_entries_dir = File.join(@blog_entries_dir, "new")
     Dir.entries(new_blog_entries_dir).select do |dir|
       # Check if it's a directory and matches the schema
       full_path = File.join(new_blog_entries_dir, dir)
