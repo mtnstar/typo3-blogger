@@ -34,12 +34,20 @@ class Blogger
   private
 
   def remove_empty_new_folders
-    Dir.entries(new_blog_entries_dir).each do |dir|
+    Dir.children(new_blog_entries_dir).each do |dir|
       full_path = File.join(new_blog_entries_dir, dir)
-      if Dir.empty?(full_path)
-        FileUtils.rmdir(full_path)
-      end
+      remove_empty_folders(full_path) if File.directory?(full_path)
     end
+  end
+
+  # removes empty sub folders first, so a folder that only contained
+  # sub folders with photos is removed as well
+  def remove_empty_folders(dir)
+    Dir.children(dir).each do |child|
+      child_path = File.join(dir, child)
+      remove_empty_folders(child_path) if File.directory?(child_path)
+    end
+    FileUtils.rmdir(dir) if Dir.empty?(dir)
   end
 
   def photos_processor
