@@ -4,6 +4,15 @@ require 'fileutils'
 module Photos
   class Processor
 
+    # patterns of file names carrying their own timestamp, used as a fallback
+    # when a photo has no date time in its meta data
+    FILE_NAME_DATE_FORMATS = {
+      # 2024-08-07-07-17-32-573.jpg
+      /^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}-\d+\.\w+$/ => '%Y-%m-%d-%H-%M-%S',
+      # IMG_20260829_103634_675.jpg, IMG_20240807_113050.jpg
+      /^IMG_\d{8}_\d{6}(_\d+)?\.\w+$/ => 'IMG_%Y%m%d_%H%M%S'
+    }.freeze
+
     def initialize(output: $stdout, blog_entries_dir:)
       @output = output
       @new_photos_dir = new_photos_dir(blog_entries_dir)
@@ -34,11 +43,16 @@ module Photos
 
     def fetch_date_from_file_name(photo)
       file_name = File.basename(photo)
-      if file_name =~ /^(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-\d+\.jpg$/
-        DateTime.strptime(file_name, '%Y-%m-%d-%H-%M-%S')
-      else
-        nil
+      FILE_NAME_DATE_FORMATS.each do |pattern, format|
+        next unless file_name =~ pattern
+
+        begin
+          return DateTime.strptime(file_name, format)
+        rescue ArgumentError
+          return nil
+        end
       end
+      nil
     end
 
     def output(entry, message)

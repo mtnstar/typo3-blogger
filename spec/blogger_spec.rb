@@ -90,6 +90,27 @@ describe Blogger do
 
     end
 
+    # the Queen Charlotte fixture keeps photos without any date time in their
+    # meta data, so the file name fallback is covered here
+    it "falls back to the date time in the file name" do
+      file_name_date_photos = {
+        "2022-11-26" => "20221126_143012.jpg", # IMG_20221126_143012_675.jpg
+        "2022-11-27" => "20221127_081542.jpg"  # 2022-11-27-08-15-42-123.jpg
+      }
+
+      file_name_date_photos.each_value do |file_name|
+        expect(output).to receive(:print)
+          .with("2022-11 Queen Charlotte Track: moved #{file_name} to processed\n")
+      end
+
+      blogger.process
+
+      file_name_date_photos.each do |day, file_name|
+        day_folder = File.join(processed_photos_dir, "2022-11 Queen Charlotte Track", day)
+        expect(File.exist?(File.join(day_folder, file_name))).to be true
+      end
+    end
+
     it "removes new folder if all photos are processed or keeps them if not" do
       blogger.process
 
