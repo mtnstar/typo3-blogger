@@ -53,7 +53,9 @@ describe Blogger do
       }
     end
 
-    it "renames and organises photos in daily folders" do
+    # the Piz Bernina fixture keeps 20240806_101105.jpg in "drone" and
+    # 20240807_092756.jpg in "drone/day2", so sub folders are covered here
+    it "renames and organises photos from the entry and its sub folders in daily folders" do
       target_file_names = bernina_target_day_file_names.values.flatten
 
       failed_output_messages = [
@@ -93,6 +95,14 @@ describe Blogger do
 
       expect(Dir.exist?(File.join(test_blog_entries_dir, "new", "2024-08 Piz Bernina"))).to be false
       expect(Dir.exist?(File.join(test_blog_entries_dir, "new", "2022-11 Queen Charlotte Track"))).to be true
+    end
+
+    it "removes empty sub folders but keeps the entry folder with unprocessed photos" do
+      blogger.process
+
+      queen_charlotte_dir = File.join(test_blog_entries_dir, "new", "2022-11 Queen Charlotte Track")
+      expect(Dir.exist?(File.join(queen_charlotte_dir, "ridge"))).to be false
+      expect(File.exist?(File.join(queen_charlotte_dir, "boat1.jpg"))).to be true
     end
   end
 end
